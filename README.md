@@ -120,6 +120,20 @@ To run the tool daily at 2 AM, add a cron job:
 
 ---
 
+## IAM Permissions
+Ensure your IAM role or user has the following permissions:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:DescribeSecurityGroups",
+            "Resource": "*"
+        }
+    ]
+}
+
 ## 🧪 Testing
 
 To ensure everything is working correctly, run the tests:

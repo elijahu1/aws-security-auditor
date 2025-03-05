@@ -24,6 +24,15 @@ def fetch_security_groups(ec2_client):
     """Fetch security groups from AWS."""
     return ec2_client.describe_security_groups()["SecurityGroups"]
 
+def validate_iam_permissions(ec2_client):
+    """Validate IAM permissions before running the audit."""
+    try:
+        ec2_client.describe_security_groups()
+        logging.info("IAM permissions validated.")
+    except Exception as e:
+        logging.error(f"IAM validation failed: {e}")
+        raise
+
 @click.command()
 @click.option("--region", default="us-east-1", help="AWS region to audit")
 @click.option("--output", default="csv", help="Output format (csv/json)")
