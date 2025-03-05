@@ -1,29 +1,13 @@
 import boto3
 import click
-import logging
-import pandas as pd
 import logging.config
-logging.config.fileConfig('config/logging.conf')
+import pandas as pd
 
 # Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.config.fileConfig('config/logging.conf')
 
-@click.command()
-@click.option("--region", default="us-east-1", help="AWS region to audit")
-@click.option("--output", default="csv", help="Output format (csv/json)")
-def audit_security_groups(region, output):
-    """Audit AWS EC2 security groups for overly permissive rules."""
-    ec2 = boto3.client("ec2", region_name=region)
-    logging.info(f"Fetching security groups in {region}...")
-
-    try:
-        sgs = ec2.describe_security_groups()["SecurityGroups"]
-        logging.info(f"Found {len(sgs)} security groups.")
-    except Exception as e:
-        logging.error(f"Failed to fetch security groups: {e}")
-        return
-
-    # Analyze rules
+def analyze_security_groups(sgs):
+    """Analyze security groups for vulnerabilities."""
     vulnerable_sgs = []
     for sg in sgs:
         for rule in sg["IpPermissions"]:
@@ -34,6 +18,29 @@ def audit_security_groups(region, output):
                         "Port": rule["FromPort"],
                         "Protocol": rule["IpProtocol"],
                     })
+    return vulnerable_sgs
+
+def fetch_security_groups(ec2_client):
+    """Fetch security groups from AWS."""
+    return ec2_client.describe_security_groups()["SecurityGroups"]
+
+@click.command()
+@click.option("--region", default="us-east-1", help="AWS region to audit")
+@click.option("--output", default="csv", help="Output format (csv/json)")
+def audit_security_groups(region, output):
+    """Audit AWS EC2 security groups for overly permissive rules."""
+    ec2 = boto3.client("ec2", region_name=region)
+    logging.info(f"Fetching security groups in {region}...")
+
+    try:
+        sgs = fetch_security_groups(ec2)
+        logging.info(f"Found {len(sgs)} security groups.")
+    except Exception as e:
+        logging.error(f"Failed to fetch security groups: {e}")
+        return
+
+    # Analyze rules
+    vulnerable_sgs = analyze_security_groups(sgs)
 
     # Output results
     if vulnerable_sgs:
@@ -48,4 +55,3 @@ def audit_security_groups(region, output):
 
 if __name__ == "__main__":
     audit_security_groups()
-
