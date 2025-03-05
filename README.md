@@ -90,6 +90,11 @@ For easier automation, use the Bash wrapper script:
 
 ---
 
+## Docker Usage
+Build the Docker image:
+```bash
+docker build -t aws-security-auditor .
+
 ## 📂 Output
 
 The tool generates a report in the `reports/` directory:
