@@ -8,5 +8,6 @@ Welcome! Here’s how you can contribute to this project:
    git checkout -b feature/your-feature-name
 
 ## Wanna reach out?
-hit me up hi@elijahu.me 
+
+hit me [hi@elijahu.me](mailto:hi@elijahu.me)
 
