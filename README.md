@@ -1,107 +1,110 @@
+# AWS Security Group Auditor
+
+AWS Security Group Auditor is a lightweight CLI tool for auditing AWS EC2 security groups to detect overly permissive firewall rules such as SSH (22) or RDP (3389) exposed to the public internet (`0.0.0.0/0`).
+
+The tool helps DevOps engineers, cloud engineers, and security teams quickly identify risky configurations and generate simple reports for remediation.
 
 ---
 
-```markdown
-# 🛡️ AWS Security Group Auditor
+## Features
 
-Welcome to the **AWS Security Group Auditor**! This is a simple yet powerful CLI tool to help you audit your AWS EC2 security groups for overly permissive rules, like open SSH (port 22) or RDP (port 3389) access to the world (`0.0.0.0/0`). It’s perfect for DevOps engineers, security teams, or anyone who wants to keep their AWS infrastructure secure.
-
----
-
-## 🚀 Features
-
-- **Identify Risky Rules**: Find security groups with `0.0.0.0/0` on critical ports.
-- **Generate Reports**: Export results in CSV or JSON format.
-- **Easy Automation**: Run it manually or schedule it with cron jobs.
-- **Lightweight**: Built with Python and Bash, so it’s easy to customize.
+* Detects security groups exposing sensitive ports to the internet
+* Generates CSV or JSON audit reports
+* Simple CLI interface
+* Easy automation via cron or CI pipelines
+* Lightweight and easy to customize
 
 ---
 
-## 🛠️ Installation
+## Quick Start
 
-### Prerequisites
-Before you start, make sure you have the following installed:
-- **Python 3.11+**: [Download Python](https://www.python.org/downloads/)
-- **AWS CLI**: [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-- **Git**: [Install Git](https://git-scm.com/downloads)
+Clone the repository:
 
-### Step 1: Clone the Repository
-First, clone this repository to your local machine:
 ```bash
 git clone https://github.com/elijahu1/aws-security-auditor.git
 cd aws-security-auditor
 ```
 
-### Step 2: Set Up a Virtual Environment
-Create a virtual environment to keep dependencies isolated:
+Create a Python virtual environment:
+
 ```bash
 python -m venv .venv
+source .venv/bin/activate
 ```
 
-Activate the virtual environment:
-- **Linux/macOS**:
-  ```bash
-  source .venv/bin/activate
-  ```
-- **Windows**:
-  ```bash
-  .venv\Scripts\activate
-  ```
+Install dependencies:
 
-### Step 3: Install Dependencies
-Install the required Python packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Configure AWS Credentials
-Make sure your AWS credentials are set up. Run:
+Configure AWS credentials:
+
 ```bash
 aws configure
 ```
-You’ll need to provide:
-- **AWS Access Key ID**
-- **AWS Secret Access Key**
-- **Default region** (e.g., `us-east-1`)
-- **Default output format** (e.g., `json`)
 
----
+Run the audit:
 
-## 🖥️ Usage
-
-### Option 1: Run with Python
-You can run the tool directly using Python:
 ```bash
 python src/audit_sg.py --region us-east-1 --output csv
 ```
-- `--region`: The AWS region to audit (default: `us-east-1`).
-- `--output`: The output format (`csv` or `json`).
-
-### Option 2: Use the Bash Wrapper
-For easier automation, use the Bash wrapper script:
-1. Make the script executable:
-   ```bash
-   chmod +x scripts/run_audit.sh
-   ```
-2. Run the script:
-   ```bash
-   ./scripts/run_audit.sh us-east-1 csv
-   ```
 
 ---
 
-## Docker Usage
-Build the Docker image:
+## Usage
+
+### Python CLI
+
+```bash
+python src/audit_sg.py --region us-east-1 --output csv
+```
+
+Options:
+
+* `--region` — AWS region to scan
+* `--output` — output format (`csv` or `json`)
+
+---
+
+### Bash Wrapper
+
+Make the script executable:
+
+```bash
+chmod +x scripts/run_audit.sh
+```
+
+Run the audit:
+
+```bash
+./scripts/run_audit.sh us-east-1 csv
+```
+
+---
+
+### Docker
+
+Build the container:
+
 ```bash
 docker build -t aws-security-auditor .
+```
 
-## 📂 Output
+Run the container:
 
-The tool generates a report in the `reports/` directory:
-- **CSV Format**: `reports/vulnerable_sgs.csv`
-- **JSON Format**: Printed to the terminal.
+```bash
+docker run aws-security-auditor
+```
 
-Example CSV Output:
+---
+
+## Output
+
+Audit reports are written to the `reports/` directory.
+
+Example CSV output:
+
 ```
 GroupId,Port,Protocol
 sg-123456,22,tcp
@@ -110,111 +113,97 @@ sg-789012,3389,tcp
 
 ---
 
-## 🤖 Automation
+## Automation
 
-### Schedule with Cron
-To run the tool daily at 2 AM, add a cron job:
-1. Open your crontab:
-   ```bash
-   crontab -e
-   ```
-2. Add the following line:
-   ```bash
-   0 2 * * * /path/to/aws-security-auditor/scripts/run_audit.sh us-east-1 csv
-   ```
+Example cron job (run daily at 2 AM):
+
+```bash
+0 2 * * * /path/to/aws-security-auditor/scripts/run_audit.sh us-east-1 csv
+```
 
 ---
 
 ## IAM Permissions
-Ensure your IAM role or user has the following permissions:
+
+The following permission is required:
+
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "ec2:DescribeSecurityGroups",
-            "Resource": "*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:DescribeSecurityGroups",
+      "Resource": "*"
+    }
+  ]
 }
+```
 
-## 🧪 Testing
+---
 
-To ensure everything is working correctly, run the tests:
+## Development
+
+Project structure:
+
+```
+aws-security-auditor/
+├── src/
+├── tests/
+├── scripts/
+├── config/
+├── reports/
+├── .github/
+├── requirements.txt
+├── Dockerfile
+├── Makefile
+├── LICENSE
+├── CONTRIBUTING.md
+└── README.md
+```
+
+Run tests:
+
 ```bash
 make test
 ```
 
----
+Format code:
 
-## 🛠️ Development
-
-### Directory Structure
-Here’s what the project looks like:
-```
-aws-security-auditor/
-├── src/                  # Python source code
-├── tests/                # Unit tests
-├── scripts/              # Bash scripts
-├── config/               # Configuration files
-├── logs/                 # Log files
-├── reports/              # Generated reports
-├── requirements.txt      # Python dependencies
-└── README.md             # This file
+```bash
+make format
 ```
 
-### Common Tasks
-- **Run Tests**:
-  ```bash
-  make test
-  ```
-- **Format Code**:
-  ```bash
-  make format
-  ```
-- **Clean Up**:
-  ```bash
-  make clean
-  ```
+Clean build artifacts:
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! If you’d like to improve this tool:
-1. Fork the repository.
-2. Create a new branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "feat: Add your feature"
-   ```
-4. Push to the branch:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-5. Open a pull request.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. Feel free to use, modify, and distribute it as you see fit.
-
----
-
-## 🙏 Credits
-
-- Built with ❤️ by [Eli]
-- Inspired by the need for better AWS security practices.
-
----
-
-Happy auditing! 🎉
+```bash
+make clean
 ```
 
 ---
+
+## Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
+
+See `CONTRIBUTING.md` for more details.
+
+---
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0.
+
+See the LICENSE file for full details.
+
+---
+
+## Author
+
+Created by Elijah U.
 
